@@ -1,3 +1,6 @@
+# WARNING - AI SLOP
+I am not proud of it, but this codebase is based on a lot of AI generated code. I needed this widget for work reasons and, in a moment of weakness, I used a frontier LLM to generate the code. I *have* contributed to the codebase in some ways. Additionally, I have spent (and continue to spend) a lot of time on testing and auditing the code to ensure that the widget is safe. I still recommend backing up your DB frequently to ensure that you do not lose any data (though I have not lost any data personally).
+
 # Logseq DB widget for KDE Plasma 6
 
 A Plasma 6 widget for **Logseq DB graphs** (the database version, not Markdown graphs). It has three sections:
