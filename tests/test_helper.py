@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for logseq_helper.py. A fake `logseq` executable records every argument
+Tests for the widget's helper (logseq_helper.py and its logseq_widget package). A fake `logseq` executable records every argument
 list it receives and answers with JSON in the shapes the real CLI produces
 (taken from logseq/cli-e2e/spec/non_sync_cases.edn and cli/lib/*.ml).
 
@@ -20,7 +20,10 @@ import urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__))
 HELPER = os.path.join(HERE, "..", "package", "contents", "code", "logseq_helper.py")
 sys.path.insert(0, os.path.dirname(HELPER))
-import logseq_helper as H  # noqa: E402
+sys.dont_write_bytecode = True  # no cache files inside the widget's folder
+from logseq_widget import cli as cli_module  # noqa: E402
+from logseq_widget import journal, processes, safeguards  # noqa: E402
+from logseq_widget import sync as sync_module  # noqa: E402
 
 FAKE_CLI = r'''#!/usr/bin/env python3
 import json, os, re, sys
@@ -386,7 +389,7 @@ class HelperTest(unittest.TestCase):
 
     def test_journal_missing_uses_graph_format(self):
         res, _ = self.call({"op": "journal"}, mode="nojournal")
-        expected = H.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
+        expected = journal.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
         self.assertEqual(res["data"]["title"], expected)
         self.assertEqual(res["data"]["blocks"], [])
 
@@ -400,7 +403,7 @@ class HelperTest(unittest.TestCase):
     def test_append_creates_journal_with_title(self):
         res, calls = self.call({"op": "append", "text": "x"}, mode="nojournal")
         up = calls[-1]
-        title = H.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
+        title = journal.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
         self.assertEqual(up[up.index("--target-page") + 1], title)
 
     def test_append_to_page(self):
@@ -455,7 +458,7 @@ class HelperTest(unittest.TestCase):
         res, calls = self.call({"op": "taskAdd", "text": "Call mum"}, mode="nojournal")
         self.assertTrue(res["ok"], res)
         up = calls[-1]
-        title = H.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
+        title = journal.format_journal_title("yyyy-MM-dd EEEE", datetime.date.today())
         self.assertEqual(up[up.index("--target-page") + 1], title)
 
     def test_journal_task_button_works(self):
@@ -699,9 +702,9 @@ class HelperTest(unittest.TestCase):
         self.assertEqual(self.parsed[-1]["opts"].get("content"), "--")
 
     def test_join_value_flags(self):
-        self.assertEqual(H.join_value_flags(["show", "--page", "-x", "--linked-references", "false"]),
+        self.assertEqual(cli_module.join_value_flags(["show", "--page", "-x", "--linked-references", "false"]),
                          ["show", "--page=-x", "--linked-references=false"])
-        self.assertEqual(H.join_value_flags(["remove", "--id", 5]), ["remove", "--id=5"])
+        self.assertEqual(cli_module.join_value_flags(["remove", "--id", 5]), ["remove", "--id=5"])
 
     # --- security: request transport and logging -------------------------
     def test_request_via_environment(self):
@@ -765,21 +768,21 @@ class HelperTest(unittest.TestCase):
             self.assertFalse(any(c[4:6] in (["server", "stop"], ["sync", "start"]) for c in calls))
 
     def test_desktop_detection(self):
-        self.assertTrue(H.desktop_running(fake_proc(DESKTOP)))
-        self.assertTrue(H.desktop_running(fake_proc((["/home/u/AppImages/Logseq.AppImage"], []))))
-        self.assertTrue(H.desktop_running(fake_proc((["/opt/Logseq/logseq"], []))))
-        self.assertFalse(H.desktop_running(fake_proc(DB_WORKER, RENDERER)))
-        self.assertFalse(H.desktop_running(fake_proc(
+        self.assertTrue(processes.desktop_running(fake_proc(DESKTOP)))
+        self.assertTrue(processes.desktop_running(fake_proc((["/home/u/AppImages/Logseq.AppImage"], []))))
+        self.assertTrue(processes.desktop_running(fake_proc((["/opt/Logseq/logseq"], []))))
+        self.assertFalse(processes.desktop_running(fake_proc(DB_WORKER, RENDERER)))
+        self.assertFalse(processes.desktop_running(fake_proc(
             (["/home/u/AppImages/logseq.appimage", "--appimage-extract"], []))))
-        self.assertFalse(H.desktop_running(fake_proc((["/usr/bin/python3", "logseq_helper.py"], []))))
-        self.assertFalse(H.desktop_running(EMPTY_PROC))
+        self.assertFalse(processes.desktop_running(fake_proc((["/usr/bin/python3", "logseq_helper.py"], []))))
+        self.assertFalse(processes.desktop_running(EMPTY_PROC))
         # Arch/AUR style: system Electron running Logseq's app.asar.
-        self.assertTrue(H.desktop_running(fake_proc(
+        self.assertTrue(processes.desktop_running(fake_proc(
             (["/usr/lib/electron34/electron", "/usr/share/logseq/app.asar"], []))))
-        self.assertFalse(H.desktop_running(fake_proc(
+        self.assertFalse(processes.desktop_running(fake_proc(
             (["/usr/lib/electron34/electron", "/usr/share/code/app.asar"], []))),
             "another Electron app is not Logseq")
-        self.assertFalse(H.desktop_running(fake_proc(
+        self.assertFalse(processes.desktop_running(fake_proc(
             (["/usr/lib/electron34/electron", "/usr/share/logseq/app.asar"],
              ["ELECTRON_RUN_AS_NODE=1"]))), "a CLI run through system Electron")
 
@@ -812,7 +815,7 @@ class HelperTest(unittest.TestCase):
         self.assertNotIn("1793016717364", log, "only the code is logged")
 
     def test_unknown_sync_error_codes_pass_through(self):
-        self.assertEqual(H.explain_sync_error('{:code :db-sync/new-thing :message "m"}'),
+        self.assertEqual(sync_module.explain_sync_error('{:code :db-sync/new-thing :message "m"}'),
                          "Logseq reported db-sync/new-thing.")
 
     # --- data safety -----------------------------------------------------------
@@ -910,9 +913,9 @@ class HelperTest(unittest.TestCase):
         # Our graph's folder isn't found by name: every graph is checked.
         os.environ["LOGSEQ_WIDGET_GRAPHS"] = self.make_graph("encoded%20name", age_seconds=5)
         try:
-            self.assertTrue(H.graph_recently_written("my graph"))
+            self.assertTrue(safeguards.graph_recently_written("my graph"))
             os.environ["LOGSEQ_WIDGET_GRAPHS"] = self.make_graph("encoded%20name", age_seconds=600)
-            self.assertFalse(H.graph_recently_written("my graph"))
+            self.assertFalse(safeguards.graph_recently_written("my graph"))
         finally:
             del os.environ["LOGSEQ_WIDGET_GRAPHS"]
 
@@ -920,9 +923,9 @@ class HelperTest(unittest.TestCase):
         folder = "/home/u/.cache/logseq-db-widget/appimage-old"
         running = ([folder + "/squashfs-root/logseq", folder + "/squashfs-root/x/db-worker-node.js"],
                    ["ELECTRON_RUN_AS_NODE=1"])
-        self.assertTrue(H.folder_in_use(folder, fake_proc(running)))
-        self.assertFalse(H.folder_in_use(folder + "-other", fake_proc(running)))
-        self.assertFalse(H.folder_in_use(folder, EMPTY_PROC))
+        self.assertTrue(processes.folder_in_use(folder, fake_proc(running)))
+        self.assertFalse(processes.folder_in_use(folder + "-other", fake_proc(running)))
+        self.assertFalse(processes.folder_in_use(folder, EMPTY_PROC))
 
     # --- where your changes are ----------------------------------------------
     def status(self, **env):
@@ -1071,10 +1074,10 @@ class HelperTest(unittest.TestCase):
             "MM_dd_yyyy": "10_07_2026",
         }
         for fmt, want in cases.items():
-            self.assertEqual(H.format_journal_title(fmt, d), want, fmt)
-        self.assertEqual(H.ordinal(11), "11th")
-        self.assertEqual(H.ordinal(22), "22nd")
-        self.assertEqual(H.ordinal(103), "103rd")
+            self.assertEqual(journal.format_journal_title(fmt, d), want, fmt)
+        self.assertEqual(journal.ordinal(11), "11th")
+        self.assertEqual(journal.ordinal(22), "22nd")
+        self.assertEqual(journal.ordinal(103), "103rd")
 
 
 # Shaped like electron-builder 26's AppRun, which can inject --no-sandbox.

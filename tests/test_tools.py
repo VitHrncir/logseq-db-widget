@@ -236,6 +236,8 @@ class ToolsTest(unittest.TestCase):
             self.assertEqual(meta["KPlugin"]["Version"], version, "built from this version")
             self.assertIn("contents/ui/main.qml", z.namelist())
             self.assertIn("contents/code/logseq_helper.py", z.namelist())
+            self.assertIn("contents/code/logseq_widget/main.py", z.namelist())
+            self.assertFalse([n for n in z.namelist() if "__pycache__" in n])
 
     # ---- purge-logseq-widget.py -----------------------------------------
     def test_dry_run_changes_nothing(self):

@@ -274,7 +274,19 @@ package/                       the Plasma package
   metadata.json
   contents/config/main.xml     settings schema
   contents/config/config.qml   settings pages
-  contents/code/logseq_helper.py   talks to the Logseq CLI
+  contents/code/logseq_helper.py   entry point: the widget runs this for each request
+  contents/code/logseq_widget/     the helper's code, one module per job:
+    errors, paths, log             the error type, the private cache folder, the log
+    processes                      your running processes (is Logseq Desktop open?)
+    cli                            running one CLI command safely
+    appimage, locate               unpacking the AppImage; choosing which CLI to run
+    entities, journal              Logseq's data shapes; journal dates and titles
+    choices                        task statuses and priorities
+    safeguards                     checks that protect your graph and Logseq Desktop
+    graph_setup, request           first start and graph choice; reading requests
+    pages, blocks, tasks           reading pages; writing blocks; the TODO list
+    sync, maintenance              sync state and start; idle stop and background sync
+    main                           running one request
   contents/ui/main.qml         entry point
   contents/ui/FullRepresentation.qml   tabs, setup flow, refreshing
   contents/ui/SetupPanel.qml   shown until the CLI and a graph are found

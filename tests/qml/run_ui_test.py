@@ -454,9 +454,11 @@ def main():
     # 12. The helper path Plasma reports is unusable: fall back to the install location.
     fake_home = tempfile.mkdtemp()
     installed = os.path.join(fake_home, ".local/share/plasma/plasmoids/io.github.logseqdbwidget/contents/code")
-    os.makedirs(installed)
+    os.makedirs(os.path.dirname(installed))
     import shutil
-    shutil.copy(os.path.join(ROOT, "package/contents/code/logseq_helper.py"), installed)
+    # The helper is logseq_helper.py plus its logseq_widget package.
+    shutil.copytree(os.path.join(ROOT, "package/contents/code"), installed,
+                    ignore=shutil.ignore_patterns("__pycache__"))
     real_home = os.environ["HOME"]
     real_path = r.backend.property("helperPath")
     os.environ["HOME"] = fake_home

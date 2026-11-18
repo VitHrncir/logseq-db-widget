@@ -11,7 +11,7 @@
         "Id": "io.github.logseqdbwidget",
         "License": "Unlicense",
         "Name": "Logseq DB",
-        "Version": "0.14.1",
+        "Version": "0.14.2",
         "Website": "https://github.com/logseq/logseq"
     },
     "KPackageStructure": "Plasma/Applet",
