@@ -1,0 +1,6 @@
+module org.kde.kirigami
+singleton Units 1.0 Units.qml
+singleton Theme 1.0 Theme.qml
+MessageType 1.0 MessageType.qml
+InlineMessage 1.0 InlineMessage.qml
+Icon 1.0 Icon.qml

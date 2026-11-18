@@ -1,0 +1,14 @@
+module org.kde.plasma.components
+TabBar 1.0 TabBar.qml
+TabButton 1.0 TabButton.qml
+ToolButton 1.0 ToolButton.qml
+Label 1.0 Label.qml
+CheckBox 1.0 CheckBox.qml
+ComboBox 1.0 ComboBox.qml
+BusyIndicator 1.0 BusyIndicator.qml
+ScrollView 1.0 ScrollView.qml
+Menu 1.0 Menu.qml
+MenuItem 1.0 MenuItem.qml
+MenuSeparator 1.0 MenuSeparator.qml
+TextField 1.0 TextField.qml
+Button 1.0 Button.qml

@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Logseq DB Widget contributors"
+            }
+        ],
+        "Category": "Utilities",
+        "Description": "Today's Logseq journal, your TODO list and up to six pinned pages (Logseq DB graphs only)",
+        "Icon": "view-calendar-day",
+        "Id": "io.github.logseqdbwidget",
+        "License": "Unlicense",
+        "Name": "Logseq DB",
+        "Version": "0.14.1",
+        "Website": "https://github.com/logseq/logseq"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
